@@ -33,6 +33,7 @@ struct ACOKMISSolution {
       solution = this->connections[idx];
       return;
     }
+
     this->solution_ids.insert(idx);
     this->solution = this->solution & this->connections[idx];
   }
@@ -51,18 +52,7 @@ struct ACOKMISSolution {
 };
 
 class ACOKMIS : public ACO {
- public:
-  ACOKMIS(std::vector<Subset> connections,
-          int numUsers,
-          int numIterations,
-          double alpha = 0.5,
-          double beta = 2.0,
-          double tau_0 = 1.0,
-          double rho = 0.7,
-          int iter_max = 50)
-      : ACO(connections, numUsers, numIterations, alpha, beta, tau_0, rho, iter_max) {
-  }
-
+ private:
   // Implementações
   void init_pheromone_matrix() {
     pheromone_matrix_.assign(numUsers, std::vector<double>(numUsers, tau_0_));
@@ -83,11 +73,15 @@ class ACOKMIS : public ACO {
 
   uint32_t get_next_element(std::vector<pair<float, int>>& j_prob) const {
     int n = sz(j_prob);
+    if (n == 0) return 0;
+    if (n == 1) return j_prob[0].second;
 
-    std::vector<float> prob_acc(n + 1, 0);
-
+    // Criar soma acumulada
+    std::vector<float> prob_acc(n);
+    prob_acc[0] = j_prob[0].first;
+    
     for (int it = 1; it < n; it++) {
-      prob_acc[it] += j_prob[it].first + prob_acc[it - 1];
+      prob_acc[it] = prob_acc[it - 1] + j_prob[it].first;
     }
 
     float x;
@@ -95,20 +89,28 @@ class ACOKMIS : public ACO {
 #ifdef __linux__
     x = drand48();  // Linux
 #elif _WIN32
-    x = (float)rand() / RAND_MAX;  // Windons
+    x = (float)rand() / RAND_MAX;  // Windows
 #else
 #error "OS not supported!"
 #endif
 
     float normalized_x = x * prob_acc[n - 1];
 
-    // TODO: verify what is better, use a IMPRECISION factor or just return the last alement
-    for (int it = 1; it < n; it++)
-      if (normalized_x <= prob_acc[it]) {
-        return j_prob[it].second;
-      }
+    // Binary search
+    int l = 0;
+    int r = n - 1;
 
-    return j_prob[n - 1].second;
+    while (l < r) {
+      int mid = l + ((r - l) >> 1);
+
+      if (prob_acc[mid] >= normalized_x) {
+        r = mid;
+      } else {
+        l = mid + 1;
+      }
+    }
+
+    return j_prob[l].second;
   }
 
   int get_next_element_by_max_p(std::vector<ACOKMISSolution>& L, std::vector<std::vector<std::vector<float>>>& p, int u, int i) const {
@@ -135,6 +137,18 @@ class ACOKMIS : public ACO {
     return get_next_element(p_u_j);
   }
 
+ public:
+  ACOKMIS(std::vector<Subset> connections,
+          int numUsers,
+          int numIterations,
+          double alpha = 0.5,
+          double beta = 2.0,
+          double tau_0 = 1.0,
+          double rho = 0.7,
+          int iter_max = 50)
+      : ACO(connections, numUsers, numIterations, alpha, beta, tau_0, rho, iter_max) {
+  }
+
   std::vector<ReportExecData> solve_kMIS(int k) override {
     vector<ReportExecData> reports;
 
@@ -149,8 +163,8 @@ class ACOKMIS : public ACO {
     auto start_time = get_current_time();
 
     while (40000 > TIME_DIFF(start_time, get_current_time())) {  // limite por tempo
-      // inicia todas soluções u
       for (int u = 0; u < numUsers; u++) {
+        L[u] = ACOKMISSolution(this->connections);  // Reset da solução
         L[u].add_item_idx(u);
       }
 
@@ -244,12 +258,6 @@ class ACOKMIS : public ACO {
       auto end_time = get_current_time();
       int elapsed_time = TIME_DIFF(start_time, end_time);
 
-      std::vector<Subset> bestvec;
-
-      for (int i : best.solution_ids) {
-        bestvec.push_back(connections[i]);
-      }
-
       reports.push_back(ReportExecData(best.solution_ids, elapsed_time));
 
       iter++;
@@ -258,11 +266,5 @@ class ACOKMIS : public ACO {
     std::cout << "[success]: ACOKMIS success runned!" << std::endl;
 
     return reports;
-  }
-
- private:
-  int intersectionSize(const roaring::Roaring& A,
-                       const roaring::Roaring& B) const {
-    return (A & B).cardinality();
   }
 };
