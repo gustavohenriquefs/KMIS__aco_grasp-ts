@@ -4,10 +4,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
 #include "../bibliotecas/roaring.hh"
 
 using namespace std;
-
 
 struct Instance {
  private:
@@ -27,12 +27,9 @@ struct Instance {
     ifstream file(file_path);
     string line;
 
-    std::cout << "Lendo instância do arquivo: " << file_path << std::endl;
     if (file.is_open()) {
       // Primeira linha - números básicos
       getline(file, line);
-
-      std::cout << "Primeira linha: " << line << std::endl;
 
       istringstream iss(line);
 
@@ -40,22 +37,19 @@ struct Instance {
 
       // Linhas seguintes - conexões
       connections.resize(num_elements_l);
-      
+
       for (int i = 0; i < num_edges; ++i) {
         int left_element, right_element;
         getline(file, line);
         istringstream edge_iss(line);
 
         edge_iss >> left_element >> right_element;
-        connections[left_element-1].add(right_element-1);
+        connections[left_element - 1].add(right_element - 1);
       }
-
-      std::cout << "Número de elementos L: " << num_elements_l << std::endl;
-      std::cout << "Número de elementos R: " << num_elements_r << std::endl;
 
       file.close();
     } else {
-      cerr << "Não foi possível abrir o arquivo: " << file_path << endl;
+      cerr << "[faild]: This file cannot be opened: " << file_path << endl;
     }
   }
 
@@ -72,9 +66,13 @@ struct Instance {
     return num_elements_r;
   }
 
+  string get_file_name() const {
+    return this->file_path;
+  }
+
   int get_k() const {
     return k;
-  } 
+  }
 
   vector<roaring::Roaring> get_connections() const {
     return this->connections;

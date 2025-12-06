@@ -34,20 +34,16 @@ class IntancesReader {
       const string folder_path = INSTANCES_DIR + name;
 
       if (!fs::exists(folder_path) || !fs::is_directory(folder_path)) {
-        cerr << "-Caminho para instâncias inválido ou não é um diretório: " << folder_path << endl;
+        cerr << "[faild]: path for instances invalid or is not a directory " << folder_path << endl;
         continue;
       }
 
       const vector<string> instance_file_names = get_instances_file_names(folder_path);
 
-      // for (const auto& instance_path : instance_file_names) {
-      //   cout << "Lendo instância do arquivo: " << instance_path << endl;
-      //   Instance instance(instance_path);
-      //   instances.push_back(instance);
-      // }
-
-      Instance instance(instance_file_names[0]);
-      instances.push_back(instance);
+      for (const auto& instance_path : instance_file_names) {
+        Instance instance(instance_path);
+        instances.push_back(instance);
+      }
     }
   }
 

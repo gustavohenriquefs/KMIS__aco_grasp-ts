@@ -3,9 +3,17 @@
 #include <math.h>
 
 #include <cassert>
+#include <chrono>
 #include <iostream>
 #include <set>
+#include <sstream>
 #include <vector>
+
+#include "../Report/report-manager.cpp"
+
+#define get_current_time() std::chrono::high_resolution_clock::now()
+#define TIME_DIFF(start, end) std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+typedef std::chrono::high_resolution_clock::time_point TimePoint;
 
 typedef roaring::Roaring Subset;
 
@@ -36,12 +44,6 @@ class ACOKMIS : public ACO {
     assert(pheromone_matrix_[0][0] == tau_0_ && "Pheromone matrix not initialized correctly");
 #endif
   }
-  // Initilização do ACO:
-  // -- Init pheromone matrix
-  void init() override {
-    init_pheromone_matrix();
-  }
-
   int tamanho_intersec(std::set<int> s) {
     Subset intersec = connections[*(s.begin())];  // primeiro elem
     for (int i : s) {
@@ -50,14 +52,18 @@ class ACOKMIS : public ACO {
     return intersec.cardinality();
   }
 
-  std::set<int> solve_kMIS(int k) override {
+  std::vector<ReportExecData> solve_kMIS(int k) override {
+    vector<ReportExecData> reports;
+
     init_pheromone_matrix();
-    
+
     std::set<int> best;
 
     int iter = 0;
-    
+
     std::vector<std::set<int>> L(numUsers, std::set<int>());  // soluções de cada formiga
+
+    auto start_time = get_current_time();
 
     while (iter < iter_max_) {  // limite por tempo
       // inicia todas soluções u
@@ -71,7 +77,7 @@ class ACOKMIS : public ACO {
         // Construir cada formiga u
         int i = u;
 
-        while (L[u].size() < k) {
+        while ((int)L[u].size() < k) {
           Subset intersec = connections[u];
 
           for (int i : L[u])
@@ -104,7 +110,7 @@ class ACOKMIS : public ACO {
           // adiciona j com maior probabilidade
           // TODO: verificar se não é pra sortear
           int j_maxp = -1;
-          
+
           for (int j = 0; j < numUsers; j++)
             if (L[u].count(j) == 0) {
               if (j_maxp == -1 || p[u][i][j] > p[u][i][j_maxp]) {
@@ -152,10 +158,23 @@ class ACOKMIS : public ACO {
           }
       }
 
+      auto end_time = get_current_time();
+      int elapsed_time = TIME_DIFF(start_time, end_time);
+
+      std::vector<Subset> bestvec;
+
+      for (int i : best) {
+        bestvec.push_back(connections[i]);
+      }
+
+      reports.push_back(ReportExecData(best, elapsed_time));
+
       iter++;
     }
 
-    return best;
+    std::cout << "[success]: ACOKMIS success runned!" << std::endl;
+    
+    return reports;
   }
 
  private:

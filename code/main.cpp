@@ -1,4 +1,6 @@
 #include <iostream>
+
+#include "./Report/report-manager.cpp"
 #include "ACO/acokmis.cpp"
 #include "Intances/instances.cpp"
 
@@ -7,33 +9,32 @@
 
 // Function to process ACO for a given instance
 // @param instance The instance to process
-void processeACO(const Instance& instance) {
+void processeACO(const Instance& instance, ReportManager& report_manager) {
   ACOKMIS aco_kmis = ACOKMIS(
       instance.get_connections(),
       instance.get_num_elements_l(),
       instance.get_num_elements_r());
 
-  aco_kmis.init();
+  auto exec_reports = aco_kmis.solve_kMIS(instance.get_k());
 
-  auto ans = aco_kmis.solve_kMIS(instance.get_k());  
+  Report report_instance(instance.get_connections(),
+                         instance.get_file_name(),
+                         instance.get_k(),
+                         exec_reports);
 
-  std::cout << "Tamanho da solução encontrada: " << ans.size() << std::endl;
-  for (int node : ans) {
-    std::cout << node << " ";
-  }
-  std::cout << std::endl;
+  report_manager.add_reports(report_instance);
 }
 
-// Function to execute ACO and measure time
-// @param instance The instance to process
-void executeAlgorithmACO(const Instance& instance) {
-  const auto start_time = get_current_time();
+// // Function to execute ACO and measure time
+// // @param instance The instance to process
+// void executeAlgorithmACO(const Instance& instance, ReportManager& report_manager) {
+//   const auto start_time = get_current_time();
 
-  processeACO(instance);
+//   processeACO(instance, report_manager);
 
-  const auto end_time = get_current_time();
-  const auto duration = TIME_DIFF(start_time, end_time);
-}
+//   const auto end_time = get_current_time();
+//   const auto duration = TIME_DIFF(start_time, end_time);
+// }
 
 int main() {
   std::cout << "-----------------começou-----------------------" << std::endl;
@@ -41,10 +42,13 @@ int main() {
   const auto& instances = reader.get_instances();
   std::cout << "-----------------leu instancia-----------------------" << std::endl;
 
-  std::cout << "Instancia 1 " << instances[0].to_string() << std::endl;
-
+  ReportManager report_manager = ReportManager();
 
   // Execute ACO for each instance
-  executeAlgorithmACO(instances[0]);
+  for (auto instance : instances) {
+    std::cout << "check instance: " << instance.get_file_name() << endl;
+    processeACO(instance, report_manager);
+  }
+
   std::cout << "-----------------acabou-----------------------" << std::endl;
 }

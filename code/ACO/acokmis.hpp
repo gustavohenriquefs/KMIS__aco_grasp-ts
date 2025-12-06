@@ -1,6 +1,6 @@
 #pragma once
-#include <vector>
 #include <set>
+#include <vector>
 
 #include "../bibliotecas/roaring.hh"
 
@@ -14,7 +14,8 @@ class ACO {
   int iter_max_;
   int numUsers;
 
-  std::vector<std::vector<double>> pheromone_matrix_;
+  std::vector<std::vector<double>>
+      pheromone_matrix_;
 
  public:
   ACO(std::vector<roaring::Roaring> connections,
@@ -35,6 +36,5 @@ class ACO {
 
   virtual ~ACO() = default;
 
-  virtual void init() = 0;
-  virtual std::set<int> solve_kMIS(int k) = 0;
+  virtual std::vector<ReportExecData> solve_kMIS(int k) = 0;
 };
