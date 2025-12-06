@@ -40,13 +40,21 @@ struct Report {
   }
   
   int get_ans(std::set<int>& ans_idx) {
-    std::vector<Subset> ans;
-
-    for (auto it : ans_idx) {
-      ans.push_back(this->connections[it]);
+    if (ans_idx.empty()) {
+      return 0;
     }
 
-    return ans.capacity();
+    // Começar com o primeiro conjunto
+    auto it = ans_idx.begin();
+    Subset intersection = this->connections[*it];
+    ++it;
+
+    // Calcular a interseção com os demais conjuntos
+    for (; it != ans_idx.end(); ++it) {
+      intersection = intersection & this->connections[*it];
+    }
+
+    return intersection.cardinality();
   }
 
   std::vector<std::vector<std::pair<std::string, std::string>>> get_data() {
