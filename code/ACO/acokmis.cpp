@@ -148,7 +148,7 @@ class ACOKMIS : public ACO {
 
     auto start_time = get_current_time();
 
-    while (60000 > TIME_DIFF(start_time, get_current_time())) {  // limite por tempo
+    while (40000 > TIME_DIFF(start_time, get_current_time())) {  // limite por tempo
       // inicia todas soluções u
       for (int u = 0; u < numUsers; u++) {
         L[u].add_item_idx(u);
