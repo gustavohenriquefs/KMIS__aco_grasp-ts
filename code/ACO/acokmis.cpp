@@ -10,10 +10,7 @@
 #include <vector>
 
 #include "../Report/report-manager.cpp"
-
-#define get_current_time() std::chrono::high_resolution_clock::now()
-#define TIME_DIFF(start, end) std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
-#define sz(v) (int)v.size()
+#include "../common.hpp"
 
 typedef std::chrono::high_resolution_clock::time_point TimePoint;
 typedef roaring::Roaring Subset;

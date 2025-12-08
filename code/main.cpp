@@ -42,21 +42,23 @@ InstanceI mapACOInstanceToGRASPTsInstance(const Instance& i) {
 }
 
 void processGRASPTs(const Instance& instance, ReportManager& report_manager) {
+  std::cout << "[DEBUG] Iniciando processGRASPTs..." << std::endl;
+  
   InstanceI i = mapACOInstanceToGRASPTsInstance(instance);
+  
   GRASPTs grasp = GRASPTs(i);
-  grasp.resolver();
+  
+  auto result = grasp.solve_kMIS();
+
+  std::cout << "[DEBUG] Resolver concluido!" << std::endl;
+  
+  Report report_instance(instance.get_connections(),
+                         instance.get_file_name(),
+                         instance.get_k(),
+                         result);
+  report_manager.add_reports(report_instance);
+  std::cout << "[DEBUG] processGRASPTs concluido!" << std::endl;
 }
-
-// // Function to execute ACO and measure time
-// // @param instance The instance to process
-// void executeAlgorithmACO(const Instance& instance, ReportManager& report_manager) {
-//   const auto start_time = get_current_time();
-
-//   processeACO(instance, report_manager);
-
-//   const auto end_time = get_current_time();
-//   const auto duration = TIME_DIFF(start_time, end_time);
-// }
 
 int main() {
   std::cout << "-----------------começou-----------------------" << std::endl;
@@ -65,13 +67,6 @@ int main() {
   std::cout << "-----------------leu instancia-----------------------" << std::endl;
 
   ReportManager report_manager = ReportManager("graspts");
-
-  // Execute ACO for each instance
-  // for (auto instance : instances) {
-  //   std::cout << "check instance: " << instance.get_file_name() << endl;
-
-  //   processACO(instance, report_manager);
-  // }
 
   for (auto instance : instances) {
     std::cout << "check instance: " << instance.get_file_name() << endl;
