@@ -39,6 +39,8 @@ InstanceI mapACOInstanceToGRASPTsInstance(const Instance& i) {
   return ni;
 }
 
+// Function to process GRASP+Tabu Search for a given instance
+// @param instance The instance to process
 void processGRASPTs(const Instance& instance, ReportManager& report_manager) {
   InstanceI i = mapACOInstanceToGRASPTsInstance(instance);
 

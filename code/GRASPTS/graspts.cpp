@@ -96,7 +96,6 @@ class GRASPTs {
   // Implementa Tabu Search (TS) - Algoritmo 5
   // ====================================================================
   Solucao busca_tabu(Solucao S, float tau, int gamma, std::vector<ReportExecData>& reports) {
-    Solucao S_atual = S;
     Solucao Sb = S;  // Sb ← S (passo 1)
 
     STM STM(tau);   // Memória de Curto Prazo (passo 2)

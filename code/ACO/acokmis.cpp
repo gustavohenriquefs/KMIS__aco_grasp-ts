@@ -194,20 +194,6 @@ class ACOKMIS : public ACO {
               p[u][i][j] = p[u][i][j] / sum;
             }
 
-          // adiciona j com maior probabilidade
-          // TODO: verificar se não é pra sortear (I create a function for bellow action)
-          // int j_maxp = -1;
-
-          // for (int j = 0; j < numUsers; j++)
-          //   if (!L[u].exist(j)) {
-          //     if (j_maxp == -1 || p[u][i][j] > p[u][i][j_maxp]) {
-          //       j_maxp = j;
-          //     }
-          //   }
-
-          // L[u].add_item_idx(j_maxp);
-          // i = j_maxp;
-
           // Alternative:
           int next_element_idx = get_next_element_by_max_p(L, p, u, i);
           L[u].add_item_idx(next_element_idx);
