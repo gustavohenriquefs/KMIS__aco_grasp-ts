@@ -16,7 +16,6 @@
 #include "./stm.cpp"
 
 using Subset = roaring::Roaring;
-using TimePoint = std::chrono::high_resolution_clock::time_point;
 
 // Classe Principal GRASPTs
 class GRASPTs {
@@ -155,9 +154,7 @@ class GRASPTs {
   }
 
   void save_report_if_better(const Solucao& S, std::vector<ReportExecData>& reports, TimePoint start_time) {
-    if (S > melhorSolucaoGlobal) {
-      melhorSolucaoGlobal.set_solucao(S);
-
+    if (melhorSolucaoGlobal.get_indices().empty() || S > melhorSolucaoGlobal) {
       auto elapsed_time = TIME_DIFF(start_time, get_current_time());
 
       reports.push_back(ReportExecData(S.get_indices(), elapsed_time));

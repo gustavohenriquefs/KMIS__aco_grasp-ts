@@ -12,7 +12,7 @@
 #include "../Report/report-manager.cpp"
 #include "../common.hpp"
 
-typedef std::chrono::high_resolution_clock::time_point TimePoint;
+
 typedef roaring::Roaring Subset;
 
 const float IMPRECISION = 0.00001;
