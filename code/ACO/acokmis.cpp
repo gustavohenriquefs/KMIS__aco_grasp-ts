@@ -110,12 +110,12 @@ class ACOKMIS : public ACO {
     return j_prob[l].second;
   }
 
-  int get_next_element_by_max_p(std::vector<ACOKMISSolution>& L, std::vector<std::vector<std::vector<float>>>& p, int u, int i) const {
+  int get_next_element_by_max_p(std::vector<ACOKMISSolution>& L, std::vector<std::vector<float>>& p, int u, int i) const {
     int j_maxp = -1;
 
     for (int j = 0; j < numUsers; j++)
       if (!L[u].exist(j)) {
-        if (j_maxp == -1 || p[u][i][j] > p[u][i][j_maxp]) {
+        if (j_maxp == -1 || p[u][j] > p[u][j_maxp]) {
           j_maxp = j;
         }
       }
@@ -123,12 +123,12 @@ class ACOKMIS : public ACO {
     return j_maxp;
   }
 
-  int get_next_element_by_prob(std::vector<ACOKMISSolution>& L, std::vector<std::vector<std::vector<float>>>& p, int u, int i) const {
+  int get_next_element_by_prob(std::vector<ACOKMISSolution>& L, std::vector<std::vector<float>>& p, int u, int i) const {
     std::vector<pair<float, int>> p_u_j;
 
     for (int j = 0; j < numUsers; j++)
       if (!L[u].exist(j)) {
-        p_u_j.push_back({p[u][i][j], j});
+        p_u_j.push_back({p[u][j], j});
       }
 
     return get_next_element(p_u_j);
@@ -158,14 +158,15 @@ class ACOKMIS : public ACO {
     std::vector<ACOKMISSolution> L(numUsers, ACOKMISSolution(this->connections));  // soluções de cada formiga
 
     auto start_time = get_current_time();
+    int tempo_limite = 40000;  // 40 segundos
 
-    while (40000 > TIME_DIFF(start_time, get_current_time())) {  // limite por tempo
+    while (tempo_limite > TIME_DIFF(start_time, get_current_time())) {  // limite por tempo
       for (int u = 0; u < numUsers; u++) {
         L[u] = ACOKMISSolution(this->connections);  // Reset da solução
         L[u].add_item_idx(u);
       }
 
-      std::vector<std::vector<std::vector<float>>> p(numUsers, std::vector<std::vector<float>>(numUsers, std::vector<float>(numUsers, 0)));  // probabilidade de escolher cada nó
+      std::vector<std::vector<float>> p(numUsers, std::vector<float>(numUsers, 0));  // probabilidade de escolher cada nó
 
       for (int u = 0; u < numUsers; u++) {
         // Construir cada formiga u
@@ -186,12 +187,12 @@ class ACOKMIS : public ACO {
           float sum = 0;
           for (int j = 0; j < numUsers; j++)
             if (!L[u].exist(j)) {
-              p[u][i][j] = pow(pheromone_matrix_[i][j], this->alpha_) * pow(mu[j], this->beta_);
-              sum += p[u][i][j];
+              p[u][j] = pow(pheromone_matrix_[i][j], this->alpha_) * pow(mu[j], this->beta_);
+              sum += p[u][j];
             }
           for (int j = 0; j < numUsers; j++)
             if (!L[u].exist(j)) {
-              p[u][i][j] = p[u][i][j] / sum;
+              p[u][j] = p[u][j] / sum;
             }
 
           // Alternative:

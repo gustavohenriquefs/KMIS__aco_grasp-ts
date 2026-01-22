@@ -69,20 +69,21 @@ int main() {
   IntancesReader reader = IntancesReader();
   const auto& instances = reader.get_instances();
 
-  ReportManager report_manager_graspts = ReportManager("graspts");
+
+  ReportManager report_manager_aco = ReportManager("aco_kmis");
 
   int instance_idx = 0;
   for (auto instance : instances) {
     instance_idx++;
-
-    processGRASPTs(instance, report_manager_graspts);
+    processACO(instance, report_manager_aco);
   }
-
-  ReportManager report_manager_aco = ReportManager("aco_kmis");
-
+  
+  ReportManager report_manager_graspts = ReportManager("graspts");
+  
   instance_idx = 0;
   for (auto instance : instances) {
     instance_idx++;
-    processACO(instance, report_manager_aco);
+
+    processGRASPTs(instance, report_manager_graspts);
   }
 }
